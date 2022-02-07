@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Offline Analytics Demo</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/mvp.css/1.8.0/mvp.css"
+      integrity="sha512-dxIu9sY732uhm/yAXN+wU43AZx/Yr/qsuGkMV97APp0aJvpk2nw1LCczNf2quHoqz7CDk4S9PvVuwDiPlORKcA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script src="./localforage.min.js"></script>
+  </head>
+  <body>
+    <main>
+      <h1>Offline Analytics Demo</h1>
+      <button onclick="createAction('btn1', 'click')" id="btn1">
+        Button 1
+      </button>
+      <button onclick="createAction('btn2', 'click')" id="btn2">
+        Button 2
+      </button>
+      <button onclick="location.reload()">Refresh</button>
+      <script>
+        function createAction(target, type) {
+          getActions().then(actions => {
+            // Add an object with target, type, and a createdAt timestamp
+            actions.push({ target, type, createdAt: new Date() })
+
+            // Save the actions to localforage
+            return localforage.setItem("actions", actions)
+          })
+        }
+
+        function getActions() {
+          // Get the value of "actions" from localforage and return it, or an empty array if value was nullish
+          return localforage.getItem("actions").then(value => value ?? [])
+        }
+
+        window.addEventListener("DOMContentLoaded", async function () {
+          let actions = await getActions()
+          let btn1_clicks = actions.filter(a => a.target === "btn1").length
+          let btn2_clicks = actions.filter(a => a.target === "btn2").length
+
+          document.querySelector(
+            "#btn1",
+          ).innerHTML = `Button 1 (${btn1_clicks})`
+          document.querySelector(
+            "#btn2",
+          ).innerHTML = `Button 2 (${btn2_clicks})`
+        })
+      </script>
+    </main>
+  </body>
+</html>
